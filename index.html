@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video</title>
+    <link rel="stylesheet" href="public/css/index.css">
+    <link rel="stylesheet" href="https://use.typekit.net/nia0gwd.css">
+</head>
+<body>
+
+    <!--Navbar-->
+    <header>
+        <div class="nav-container">
+            <a href="/" class="nav-item home-link">MP4ium</a>
+            <a class="nav-item github-link" target="_blank" rel="noopener noreferrer" href="https://github.com/JacksonGaringer">Github</a>
+        </div>
+    </header>
+
+    <!--Content-->
+    <div class="content-container">
+        <div class="hero-text">Quickly share MP4 clips</div>
+
+        <div class="upload-form">
+
+            <form action="/upload" method="POST" enctype="multipart/form-data">
+                <input class="file-form" type="file" name="video-upload" hidden>
+                <button type="button" class="select-button">Select File</button>
+                <span class="custom-message">No file chosen</span><br>
+                <button class="upload-button wiggle" type="submit" disabled>Upload</button>
+            </form>
+
+            <script>
+                
+                const fileInput = document.querySelector(".file-form");
+                const fileText = document.querySelector(".custom-message");
+                const selectorButton = document.querySelector(".select-button");
+                const submitButton = document.querySelector(".upload-button");
+
+                selectorButton.addEventListener("click", () => {
+                    fileInput.click();
+                });
+
+                fileInput.addEventListener("change", () => {
+                    if (fileInput.value) {
+                        fileText.innerHTML = fileInput.value.match(
+                            /[\/\\]([\w\d\s\.\-\(\)]+)$/    // <-- Get file name
+                            )[1]
+                        if (fileText.innerHTML.length > 25) {
+                            fileText.innerHTML =  `${fileText.innerHTML.slice(0, 20)}...`;
+                        }
+                    }
+
+                    if (fileInput.files[0].type != 'video/mp4') {
+                        alert(`${fileInput.files[0].name} is not a .mp4!`);
+                        fileInput.value = "";
+                        fileText.innerHTML = "No file chosen";
+                    }
+                    isInputEmpty();
+                });
+
+                function isInputEmpty() {
+                    if (fileInput.value == "") {
+                        submitButton.disabled = true;
+                    } else {
+                        submitButton.disabled = false;
+                    }
+                }
+
+            </script>
+        </div>
+    </div>
+
+</body>
+</html>

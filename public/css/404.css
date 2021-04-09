@@ -1,0 +1,80 @@
+html {
+    height: 100%;
+}
+
+body {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    left: 0;
+    margin: 0;
+    height: 100%;
+}
+
+.nav-container {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    margin: 25px;
+    margin-left: 10%;
+    margin-right: 10%;
+    margin-top: 35px;
+    align-items: center;
+}
+
+.nav-item {
+    font-family: roboto, sans-serif;
+    font-style: normal;
+    transition: transform 0.15s ease;
+}
+
+.nav-item:hover {
+    cursor: pointer;
+    transform: scale(1.05);
+    transition: transform 0.15s ease;
+}
+
+.home-link {
+    grid-column: 1;
+    font-weight: 700;
+    font-size: x-large;
+    justify-self: start;
+}
+
+.github-link {
+    grid-column: 4;
+    font-weight: 400;
+    font-size: large;
+    justify-self: end;
+}
+
+.nav-item:visited, .nav-item:link, .nav-item:active
+{   
+    color: #000000;
+    text-decoration: none !important
+}
+
+.content-container {
+    display: grid;
+    padding: 25px;
+    align-items: center;
+    justify-items: center;
+    grid-template-columns: 1fr;
+    height: 50vh;
+}
+
+.hero-text {
+    grid-column: 1;
+    font-family: roboto, sans-serif;
+    font-weight: 700;
+    font-style: normal;
+    font-size: 75px;
+}
+
+body {
+    background-image: url(../img/wave.svg);
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-position: center;
+    background-size: cover;
+}

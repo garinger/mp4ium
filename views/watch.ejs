@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="/public/css/watch.css">
+    <link rel="stylesheet" href="https://use.typekit.net/nia0gwd.css">
+</head>
+<body>
+
+    <!--Navbar-->
+    <header>
+        <div class="nav-container">
+            <a href="/" class="nav-item home-link">Video</a>
+            <a class="nav-item timestamp-link">Copy Link</a>
+            <a class="nav-item github-link" target="_blank" rel="noopener noreferrer" href="https://github.com/JacksonGaringer">Github</a>
+        </div>
+        </header>
+
+    <!--Content-->
+    <div class="content-container">
+            <video class="video-player" id="videoPlayer" width="650" controls controlsList="nodownload">
+                <source src="http://localhost:3000/stream/<%= data.id %>" type="video/mp4">
+            </video>
+    </div>
+
+    <!-- <button class="timestamp-button">Copy Time Stamp</button> -->
+
+    <script>
+        
+        const myPlayer = document.querySelector(".video-player");
+        const myTimeStampButton = document.querySelector(".timestamp-link");
+        const timeStamp = new URLSearchParams(window.location.search).get("t");
+
+        if (timeStamp) {
+            myPlayer.currentTime = timeStamp;
+        }
+
+        myTimeStampButton.addEventListener("click", () => {
+            currentUrl = window.location.href;
+            lengthOfUrl = window.location.href.length;
+
+            if (timeStamp) {
+                newUrl = currentUrl.slice(0, lengthOfUrl - (timeStamp.length + 3)); // Slices off existing timestamp
+                navigator.clipboard.writeText(newUrl + `?t=${Math.floor(myPlayer.currentTime)}`);
+            } else {
+                navigator.clipboard.writeText(window.location.href + `?t=${Math.floor(myPlayer.currentTime)}`);
+            }
+        });
+
+    </script>
+
+</body>
+</html>
