@@ -19,10 +19,10 @@ db.once('open', () => console.log('Connected to database'));
 
 // Remove uploads older than 24 hours
 function checkUploadDate (next) {
-    fs.readdir('./uploads', (err, files) => {
+    fs.readdir('./public/uploads', (err, files) => {
         files.forEach(file => {
-            if (fs.statSync(`./uploads/${file}`).birthtimeMs <= Date.now() - 86400000) { // 24 hours in milliseconds
-                fs.unlink(`./uploads/${file}`, (err) => {
+            if (fs.statSync(`./public/uploads/${file}`).birthtimeMs <= Date.now() - 86400000) { // 24 hours in milliseconds
+                fs.unlink(`./public/uploads/${file}`, (err) => {
                     console.log(`${file} removed`);
                     if (err) console.error(err);
                 });
@@ -33,7 +33,7 @@ function checkUploadDate (next) {
 
 // Multer middleware for upload dest & file checking
 const storage = multer.diskStorage({
-    destination: 'uploads',
+    destination: 'public/uploads',
     filename: (req, file, callback) => {
         callback(null, Date.now() + path.extname(file.originalname));
     }
@@ -96,29 +96,7 @@ app.get('/watch/:id', (req, res) => {
 // Stream upload
 app.get('/stream/:id', (req, res) => {
 
-    const range = req.headers.range;
-    if (!range) res.status(400).send("Requires range header");
-
-    const videoPath = path.join(__dirname, `/uploads/${req.params.id}.mp4`)
-    const videoSize = fs.statSync(videoPath).size;
-
-    const CHUNK_SIZE = 10 ** 6; // 1MB
-    const start = Number(range.replace(/\D/g, ""));
-    const end = Math.min(start + CHUNK_SIZE, videoSize - 1);
-
-    const contentLength = end - start + 1;
-    const headers = {
-        "Content-Range": `bytes ${start}-${end}/${videoSize}`,
-        "Accept-Ranges": "bytes",
-        "Content-Length": contentLength,
-        "Content-Type": "video/mp4"
-    };
-
-    res.writeHead(206, headers);
-
-    const videoStream = fs.createReadStream(videoPath, { start, end });
-
-    videoStream.pipe(res);
+    res.sendFile(`/public/uploads/${req.params.id}.mp4`, {root: __dirname});
 
 });
 
