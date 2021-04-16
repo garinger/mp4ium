@@ -1,24 +1,24 @@
 require("dotenv").config();
 const express = require("express");
 const app = express();
-const mongoose = require("mongoose");
-const uploadModel = require("./models/uploadModel.js");
-const multer = require("multer");
+const https = require("https");
+const http = require("http");
 const path = require("path");
+const multer = require("multer");
 const fs = require("fs");
-const cron = require("node-cron");
+
+app.use((req, res, next) => {
+  if (req.secure) {
+    // Request was via https
+    next();
+  } else {
+    // Request was via http, so redirect
+    res.redirect("https://" + req.headers.host + req.url);
+  }
+});
 
 // Static files
-app.use("/public", express.static(__dirname + "/public"));
-
-// Database
-mongoose.connect(process.env.DATABASE_URL, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-});
-const db = mongoose.connection;
-db.on("error", (error) => console.error(error));
-db.once("open", () => console.log("Connected to database"));
+app.use("/", express.static(__dirname + "/public"));
 
 // Remove uploads older than 24 hours
 function checkUploadDate(next) {
@@ -49,7 +49,7 @@ const storage = multer.diskStorage({
 const videoUpload = multer({
   storage: storage,
   limits: {
-    fileSize: 1073741825, // Gig?
+    fileSize: 1073741825, // 1 Gig
   },
   fileFilter: async (req, file, cb) => {
     if (file.mimetype == "video/mp4") {
@@ -75,17 +75,6 @@ app.get("", (req, res) => {
 app.post("/upload", videoUpload.single("video-upload"), async (req, res) => {
   checkUploadDate(); // Remove old uploads
 
-  // Set database inputs
-  const uploadData = new uploadModel({
-    fileName: req.file.originalname,
-  });
-
-  try {
-    const newUpload = await uploadData.save(); // Saving to database
-  } catch (err) {
-    res.status(400).json({ message: err.message });
-  }
-
   let uploadId = JSON.stringify(req.file.filename);
   uploadId = uploadId.slice(1, uploadId.length - 5);
 
@@ -104,9 +93,31 @@ app.get("/stream/:id", (req, res) => {
 
 // 404
 app.use("*", (req, res) => {
-  res.sendFile("/404.html", { root: __dirname });
+  res.sendFile("/public/404.html", { root: __dirname });
 });
 
-// PORT
-const port = process.env.PORT || 3000;
-app.listen(port, () => console.log(`Listening on port: ${port}.`));
+// -------- SERVERS & SSL --------
+
+const port = process.env.PORT || 80;
+
+const httpsOptions = {
+  cert: fs.readFileSync(path.join(__dirname, "ssl", "cert.pem")),
+  key: fs.readFileSync(path.join(__dirname, "ssl", "private.pem")),
+};
+
+// Secure server
+https.createServer(httpsOptions, app).listen(port, () => {
+  console.log(`https server started on port ${port} 🚀`);
+});
+
+// To catch non-https connections
+http
+  .createServer((req, res) => {
+    res.writeHead(301, {
+      Location: "https://" + req.headers["host"] + req.url,
+    });
+    res.end();
+  })
+  .listen(80, () => {
+    console.log("http server started on port 80 ✅");
+  });
